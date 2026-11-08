@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activities - KMUTNB</title>
+    <!-- นำเข้าฟอนต์ Kanit จาก Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Kanit', sans-serif !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background-color: #0f0f13;
+            color: #1d1d1f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* กรอบหน้าเว็บหลัก */
+        .page-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: filter 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* ------------------ FIXED BACKGROUNDS ------------------ */
+        .header-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background-image: url('pic/พระจอมเกล้า.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            opacity: 0.85;
+            pointer-events: none;
+        }
+
+        .footer-bg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            background-image: url('pic/foter.png');
+            background-size: cover;
+            background-position: bottom center;
+            z-index: 1;
+            opacity: 0.95;
+            pointer-events: none;
+        }
+
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(255, 255, 255, 0.96) 0%, 
+                rgba(255, 255, 255, 0.86) 35%, 
+                rgba(255, 255, 255, 0.86) 65%, 
+                rgba(255, 255, 255, 0.98) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* ------------------ CONTENT WRAPPER ------------------ */
+        .content-wrapper {
+            position: relative;
+            z-index: 3;
+            padding: 40px 80px 20px 80px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .top-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-shrink: 0;
+            margin-bottom: 25px;
+        }
+
+        h1.activities-title {
+            font-size: 64px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: #111111;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        h1.activities-title .orange-c {
+            color: #FF7700;
+        }
+
+        .sub-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #6e6e73;
+            letter-spacing: -0.01em;
+        }
+
+        /* ------------------ SCROLLABLE ACTIVITIES AREA ------------------ */
+        .activities-scroll-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-right: 15px;
+            padding-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 45px;
+            scroll-behavior: smooth;
+        }
+
+        .activities-scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        .activities-scroll-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .activities-scroll-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+        }
+        .activities-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 40px;
+            padding: 10px 0;
+        }
+
+        /* 🖼️ โครงสร้างกรอบรูปภาพด้านซ้าย */
+        .activity-img-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+            width: 320px;
+        }
+
+        /* 🔄 ระบบจัดการเลย์เอาต์รูปภาพอัตโนมัติ */
+        .activity-img-grid {
+            display: grid;
+            gap: 8px;
+            width: 100%;
+        }
+
+        /* กรณีมี 1 รูป */
+        .activity-img-grid.count-1 {
+            grid-template-columns: 1fr;
+        }
+        .activity-img-grid.count-1 .activity-img-box {
+            height: 190px;
+        }
+
+        /* กรณีมี 2 รูป: วางคู่กันซ้าย-ขวา (เหมือนแถวบนของแบบ 3 รูปเป๊ะ) ขนาดไม่ยืด */
+        .activity-img-grid.count-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .activity-img-grid.count-2 .activity-img-box {
+            height: 90px;
+        }
+
+        /* กรณีมี 3 รูป: 2 รูปบน (เหมือนแบบ 2 รูป), รูปที่ 3 อยู่ล่างซ้ายขนาดเท่ากัน */
+        .activity-img-grid.count-3 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .activity-img-grid.count-3 .activity-img-box:nth-child(1),
+        .activity-img-grid.count-3 .activity-img-box:nth-child(2) {
+            height: 90px;
+        }
+        .activity-img-grid.count-3 .activity-img-box:nth-child(3) {
+            height: 90px;
+            grid-column: 1 / 2;
+        }
+
+        /* กรณีมี 4 รูปขึ้นไป: จัดวางเป็นตาราง 2x2 */
+        .activity-img-grid.count-more {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .activity-img-grid.count-more .activity-img-box {
+            height: 90px;
+        }
+
+        .activity-img-box {
+            width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #e5e5ea;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.10), 0 2px 6px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+        }
+
+        .activity-img-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .activity-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .activity-img-box:hover img {
+            transform: scale(1.05);
+        }
+
+        /* ข้อความตัวหนังสือสีเทาเล็กๆ ใต้รูป */
+        .img-hint {
+            font-size: 11px;
+            color: #86868b;
+            text-align: center;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+
+        /* ส่วนข้อความทางด้านขวา */
+        .activity-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+            padding-top: 5px;
+        }
+
+        .activity-date {
+            font-size: 13px;
+            font-weight: 600;
+            color: #FF7700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .activity-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1d1d1f;
+            letter-spacing: -0.01em;
+        }
+
+        .activity-desc {
+            font-size: 15px;
+            font-weight: 400;
+            color: #6e6e73;
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        /* ส่วนท้ายล่างสุด */
+        .footer-section {
+            position: absolute;
+            bottom: 15px;
+            right: 80px;
+            font-size: 12px;
+            color: #86868b;
+            font-weight: 500;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* ------------------ LIGHTBOX MODAL ------------------ */
+        .lightbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s;
+        }
+
+        .lightbox-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .lightbox-content {
+            max-width: 85vw;
+            max-height: 85vh;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.5);
+            transform: scale(0.85);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #000;
+        }
+
+        .lightbox-overlay.active .lightbox-content {
+            transform: scale(1);
+        }
+
+        .lightbox-content img {
+            width: 100%;
+            height: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        body.lightbox-open .page-container {
+            filter: grayscale(100%) blur(8px);
+            transform: scale(0.98);
+            pointer-events: none;
+        }
+
+        /* 📝 สไตล์สำหรับข้อความปิดท้ายด้านล่างสุด */
+        .closing-remark {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            font-size: 13px;
+            color: #86868b;
+            line-height: 1.7;
+            max-width: 1020px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <!-- ภาพพื้นหลังตรึงตำแหน่ง -->
+        <div class="header-bg"></div>
+        <div class="footer-bg"></div>
+        <div class="gradient-overlay"></div>
+
+        <div class="content-wrapper">
+            <!-- หัวข้อหลัก (ตรึงไว้ไม่เลื่อนตาม) -->
+            <div class="top-section">
+                <h1 class="activities-title">A<span class="orange-c">C</span>TIVITIES</h1>
+                <h2 class="sub-title">กิจกรรมนอกเหนือเพิ่มเติม</h2>
+            </div>
+
+            <!-- พื้นที่เลื่อนเฉพาะรายการกิจกรรม (เทมเพรด 10 กิจกรรม) -->
+            <div class="activities-scroll-container">
+                
+                <!-- กิจกรรมที่ 1 (ตัวอย่าง: ใส่ 2 รูปภาพ จัดวางคู่กันซ้าย-ขวา เหมือนแถวบนของแบบ 3 รูป) -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                      <div class="activity-img-grid count-more">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ปีใหม่/ปีใหม่4.jpg" alt="Img 1"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ปีใหม่/ปีใหม่1.jpg" alt="Img 2"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ปีใหม่/ปีใหม่3.jpg" alt="Img 3"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ปีใหม่/ปีใหม่2.jpg" alt="Img 4"></div>
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 1</span>
+                        <h3 class="activity-title">กิจกรรมปีใหม่/วันเด็ก ประจำปีการศึกษา2569</h3>
+                        <p class="activity-desc">ปฏิบัติหน้าที่ในคณะกรรมการสภานักเรียน ในงานปีใหม่/วันเด็ก ประจำปีการศึกษา2569 ในการดำเนินงานต่างๆตั้งแต่ต้นจนจบกิจกรรม อำนวยความสะดวกต่างๆ และดูแลความเรียบร้อยภายในงาน </p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 2 (ตัวอย่าง: ใส่ 3 รูปภาพ) -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-2">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/สมาคมกีฬาจังหวัด/สมาคม.jpg" alt="Activity 2-1"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/สมาคมกีฬาจังหวัด/สมาคม2.jpg" alt="Activity 2-2"></div>
+                           
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 2</span>
+                        <h3 class="activity-title">สวนสนามพิธีเปิดงานสมาคมกีฬา จังหวัดสมุทรสงคราม</h3>
+                        <p class="activity-desc">ได้รับการคัดเลือกให้เป็นหนึ่งในตัวแทนของวงโยธวาทิตโรงเรียนถาวรานุกูล ในพิธีเปิดสวนสนามงานสมาคมกีฬา จังหวัดสมุทรสงคราม</p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 3 (ตัวอย่าง: ใส่ 4 รูปภาพ) -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-3">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/กีฬาอวุโส/โส1.jpg" alt="Img 1"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/กีฬาอวุโส/โส2.jpg" alt="Img 2"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/กีฬาอวุโส/โส3.jpg" alt="Img 3"></div>
+    
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 3</span>
+                        <h3 class="activity-title">สวนสนามพิธีเปิดงานกีฬาอวุโส</h3>
+                        <p class="activity-desc">ได้รับการคัดเลือกให้เป็นหนึ่งในตัวแทนของวงโยธวาทิตโรงเรียนถาวรานุกูล พิธีเปิดงานสวนสนามงานกีฬาอวุโส </p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 4 (1 รูปเดี่ยว) -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                         <div class="activity-img-grid count-3">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/แข่งฟุตบอล/ฟุตบอล1.jpg" alt="Activity 2-1"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/แข่งฟุตบอล/ฟุตบอล2.jpg" alt="Activity 2-2"></div>
+                              <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/แข่งฟุตบอล/ฟุตบอล3.jpg" alt="Activity 2-2"></div>
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 4</span>
+                        <h3 class="activity-title">สวนสนามพิธีเปิดงานการแข่งขันฟุตบอล SAMUTSONGKHRAM MOLLEAGUE ครั้งที่2 </h3>
+                        <p class="activity-desc">ได้รับการคัดเลือกให้เป็นหนึ่งในตัวแทนของวงโยธวาทิตโรงเรียนถาวรานุกูล ในพิธีสวนสนามพิธีเปิดงานการแข่งขันฟุตบอล SAMUTSONGKHRAM MOLLEAGUE ครั้งที่2</p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 5 -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-2">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/บวชหมู่/บวชหมู่1.jpg" alt="Activity 5"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/บวชหมู่/บวชหมู่2.jpg" alt="Activity 5"></div>
+                       
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 5</span>
+                        <h3 class="activity-title">งานอุปสมบทหมู่ ณ วัดป้อมแก้ว</h3>
+                        <p class="activity-desc">ได้รับการคัดเลือกให้เป็นหนึ่งในตัวแทนของวงโยธวาทิตโรงเรียนเพื่อเดินทางไปบรรเลงดนตรีในงานอุปสมบทหมู่ ณ วัดป้อมแก้ว</p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 6 -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-2">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ไหว้ครู/ไหว้ครู1.jpg" alt="Activity 6"></div>
+                              <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ไหว้ครู/ไหว้ครู2.jpg" alt="Activity 6"></div>
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 6</span>
+                        <h3 class="activity-title">พิธีไหว้ครู ปีการศึกษา 2567 </h3>
+                        <p class="activity-desc">ได้ร่วมบรรเลงดนตรีภายในงานพิธีไหว้ครู ประจำปีการศึกษา 2567 </p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 7 -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-3">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/กีฬาสี/กีฬาสี1.jpg" alt="Activity 7"></div>
+                             <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/กีฬาสี/กีฬาสี2.jpg" alt="Activity 7"></div>
+                              <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/กีฬาสี/กีฬาสี3.jpg" alt="Activity 7"></div>
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 7</span>
+                        <h3 class="activity-title">สวนสนามพิธีเปิดงานกีฬาสี โรงเรียนถาวรานุกูล ปีการศึกษา 2568</h3>
+                        <p class="activity-desc">ได้รับการคัดเลือกให้เป็นหนึ่งในตัวแทนของวงโยธวาทิตโรงเรียนถาวรานุกูล ในขบวนแห่สีฬาสีและพิธีสวนสนามพิธีเปิดงานกีฬาสี ประจำปีการศึกษา 2568</p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 8 -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-3">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ปฐม/ปฐม1.jpg" alt="Activity 8"></div>
+                               <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ปฐม/ปฐม2.jpg" alt="Activity 8"></div>
+                                  <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/ปฐม/ปฐม3.jpg" alt="Activity 8"></div>
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 8</span>
+                        <h3 class="activity-title">งานปฐมนิเทศรับลูกเรือ THN Student Orientation 2024</h3>
+                        <p class="activity-desc">ได้รับคัดเลือกให้ปฏิบัติหน้าที่บรรเลงดนตรีเพื่อสร้างสีสันและความสนุกสนานให้กับนักเรียนชั้นมัธยมศึกษาปีที่1 ที่เดินทางมาเข้าร่วมงานปฐมนิเทศรับลูกเรือโรงเรียนถาวรานุกูล ปีการศึกษา 2567</p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 9 -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-more">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/อบรมดนตรี/อบรม1.jpg" alt="Activity 9"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/อบรมดนตรี/อบรม2.jpg" alt="Activity 9"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/อบรมดนตรี/อบรม4.jpg" alt="Activity 9"></div>
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/อบรมดนตรี/อบรม5.jpg" alt="Activity 9"></div>
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 9</span>
+                        <h3 class="activity-title">ข้าร่วมการอบรมเชิงปฏิบัติการ “สัปดาห์ศิลป์” </h3>
+                        <p class="activity-desc">เข้าร่วมการอบรมเชิงปฏิบัติการ “สัปดาห์ศิลป์” โดยได้รับความรู้และ
+ประสบการณ์เกี่ยวกับกระบวนการทำงานด้านดนตรี ทั้งในส่วนของการ
+ทำงานเบื้องหลังและการปฏิบัติงานบนเวที ซึ่งช่วยพัฒนาทักษะการ
+ทำงานเป็นทีม ความรับผิดชอบ และความเข้าใจในกระบวนการจัดการ
+แสดงอย่างเป็นระบบ และมีการถ่ายทอดสดเพื่อประชาสัมพันธ์งาน วิ่ง 100ปีถาวรานุกูล  100year thawara run </p>
+                    </div>
+                </div>
+
+                <!-- กิจกรรมที่ 10 -->
+                <div class="activity-item">
+                    <div class="activity-img-wrapper">
+                        <div class="activity-img-grid count-3">
+                            <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/อบรมวงโย/โย1.jpg" alt="Activity 10"></div>
+                               <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/อบรมวงโย/โย2.jpg" alt="Activity 10"></div>
+                                  <div class="activity-img-box" onclick="openLightbox(this.querySelector('img'))"><img src="pic/อบรมวงโย/โย3.jpg" alt="Activity 10"></div>
+                        </div>
+                        <span class="img-hint">คลิกเพื่อดูรูปภาพ</span>
+                    </div>
+                    <div class="activity-info">
+                        <span class="activity-date">กิจกรรมที่ 10</span>
+                        <h3 class="activity-title">เข้าร่วมการอบรมปรับพื้นฐานสนตรีสากล</h3>
+                        <p class="activity-desc">เข้าร่วมการอบรมปรับพื้นฐานดนตรีสากล โดยได้รับความรู้เกี่ยวกับ
+หน้าที่และบทบาทของเครื่องดนตรีแต่ละประเภทในวงโยธวาทิต รวมถึง
+การฝึกวอร์มอัพ และพื้นฐานการบรรเลง เพื่อพัฒนาความรู้และทักษะ
+ในการปฏิบัติดนตรีร่วมกับผู้อื่น</p>
+                    </div>
+                </div>
+
+                <div class="closing-remark">
+                    กิจกรรมเพิ่มเติมต่างๆ แสดงถึงความตระตือรือล้นในการเรียนรู้สิ่งใหม่ๆ อยู่เสมอ เพราะทักษะด้านดนตรีและศิลปะสามารถนำมาประยุกต์และปรับใช้กับทักษะด้านเทคโนโลยีและการทำงานให้เข้าด้วยกันได้ เช่น การมีความคิดริเริ่มสร้างสรรค์ การแก้ปัญหาเฉพาะหน้า การรับมือกับความกดดัน และการทำงานร่วมกันเป็นทีม เพราะวงดนตรีไม่สามารถบรรเลงด้วยคนเดียวได้
+                </div>
+
+            </div>
+
+            <div class="footer-section">
+                <span>King Mongkut's University of Technology North Bangkok</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal Container -->
+    <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <img id="lightboxImg" src="" alt="Zoomed Activity Image">
+        </div>
+    </div>
+
+    <script>
+        function openLightbox(imgElement) {
+            const overlay = document.getElementById('lightboxOverlay');
+            const lightboxImg = document.getElementById('lightboxImg');
+            
+            lightboxImg.src = imgElement.src;
+            document.body.classList.add('lightbox-open');
+            overlay.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const overlay = document.getElementById('lightboxOverlay');
+            
+            overlay.classList.remove('active');
+            document.body.classList.remove('lightbox-open');
+        }
+    </script>
+
+</body>
+</html>
